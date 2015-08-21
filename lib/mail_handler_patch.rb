@@ -21,6 +21,24 @@ module RedmineHelpdesk
        # if roles.any? {|role| role.allowed_to?(:treat_user_as_supportclient) }
 	if issue.author.type.eql?("AnonymousUser") || roles.any? {|role| role.allowed_to?(:treat_user_as_supportclient) }
           sender_email = @email.from.first
+        if roles.any? {|role| role.allowed_to?(:treat_user_as_supportclient) }
+          if !@email.reply_to.nil?
+            sender_email = @email.reply_to.first
+          else
+            sender_email = @email.from.first
+          end
+          email_details = "From: " + @email[:from].formatted.first + "\n"
+          email_details << "To: " + @email[:to].formatted.join(', ') + "\n"
+          if !@email.reply_to.nil?
+            email_details << "Reply-To: " + @email[:reply_to].formatted.join(', ') + "\n"
+          end
+          if !@email.cc.nil?
+            email_details << "Cc: " + @email[:cc].formatted.join(', ') + "\n"
+          end
+          email_details << "Date: " + @email[:date].to_s + "\n"
+          email_details = "<pre>\n" + Mail::Encodings.unquote_and_convert_to(email_details, 'utf-8') + "</pre>"
+          issue.description = email_details + issue.description
+          issue.save
           custom_field = CustomField.find_by_name('owner-email')
           custom_value = CustomValue.where(
             "customized_id = ? AND custom_field_id = ?", issue.id, custom_field.id).
