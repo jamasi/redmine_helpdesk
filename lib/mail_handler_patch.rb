@@ -21,7 +21,6 @@ module RedmineHelpdesk
        # if roles.any? {|role| role.allowed_to?(:treat_user_as_supportclient) }
 	if issue.author.type.eql?("AnonymousUser") || roles.any? {|role| role.allowed_to?(:treat_user_as_supportclient) }
           sender_email = @email.from.first
-        if roles.any? {|role| role.allowed_to?(:treat_user_as_supportclient) }
           if !@email.reply_to.nil?
             sender_email = @email.reply_to.first
           else
